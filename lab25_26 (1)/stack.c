@@ -68,26 +68,58 @@ void stackPrint(Stack* s) {
     printf("\n");
 }
 
-void stackInsertSort(Stack* s) {
+void searchAndMove(Stack* s) {
+    if (stackIsEmpty(s) || s->size == 1) {
+        return; // Стек пуст или содержит только один элемент, ничего не делаем
+    }
+
     Stack tempStack;
     stackInit(&tempStack);
 
+    int first = stackTop(s);
+    stackPop(s);
+    stackPush(&tempStack, first);
+
     while (!stackIsEmpty(s)) {
         int current = stackTop(s);
-        stackPop(s);
+        int prevTop = stackTop(&tempStack);
 
-        while (!stackIsEmpty(&tempStack) && stackTop(&tempStack) > current) {
-            int temp = stackTop(&tempStack);
-            stackPop(&tempStack);
-            stackPush(s, temp);
-        }
-
-        stackPush(&tempStack, current);
+        if (current < prevTop) {
+            stackPush(&tempStack, current);
+            stackPop(s);
+        } else 
+            break;
+        
     }
 
     while (!stackIsEmpty(&tempStack)) {
         int temp = stackTop(&tempStack);
         stackPop(&tempStack);
         stackPush(s, temp);
+    }
+}
+
+
+void stackInsertSort(Stack* s) {
+    Stack tempStack;
+    stackInit(&tempStack);
+
+    while (!stackIsEmpty(s)) {
+        searchAndMove(&tempStack);
+
+        int current = stackTop(s);
+        stackPop(s);
+
+        while (!stackIsEmpty(&tempStack) && current < stackTop(&tempStack)) {
+            stackPush(s, stackTop(&tempStack));
+            stackPop(&tempStack);
+        }
+
+        stackPush(&tempStack, current);
+    }
+
+    while (!stackIsEmpty(&tempStack)) {
+        stackPush(s, stackTop(&tempStack));
+        stackPop(&tempStack);
     }
 }
