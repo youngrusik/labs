@@ -1,0 +1,6 @@
+Surname; Initials; Gender; School number; Medal; Math; Russian; Informatics; Essay
+Golubev; TD; M; 86; 0; 86; 100; 100; 1; 
+Maximova; DF; F; 23; 1; 32; 43; 89; 1; 
+Zheleznov; HF; M; 2; 1; 86; 100; 100; 1; 
+Maximova; HF; F; 23; 1; 32; 43; 89; 1; 
+Anutina; FG; F; 4323; 0; 86; 100; 100; 1; 
