@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
             break;
         }
         scanf("%d", &b);
-        if (a < 1 || a > n || b < 1 || b > n) {
+        if (a < 1  a > n  b < 1 || b > n) {
             printf("Неверно выбраны матрицы!\n\n");
             continue;
         }
@@ -62,13 +62,17 @@ int main(int argc, char **argv) {
                 printf("Матрица не является диагональной\n");
             }
             printf("==---------------==\n\n");
+            free_matrix(res);
         }
     }
     
-
     for (int i = 0; i < n; i++) {
         free_matrix(list[i]);
     }
+    
+    fclose(fd);
+    return 0;
+}
 
     return 0;
 }
