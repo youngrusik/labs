@@ -12,3 +12,4 @@ typedef struct {
     int informatics;
     bool essay;
 } Entrant;
+
