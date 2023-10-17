@@ -68,12 +68,101 @@ void quickSort(Entrant arr[], int start, int end)
     quickSort(arr, p + 1, end);
 }
 
-bool ent_eq(Entrant e1, Entrant e2) {
+bool ent_eq_points(Entrant e1, Entrant e2) {
     return (e1.math == e2.math) && (e1.russian == e2.russian) && (e1.informatics == e2.informatics);
+}
+
+bool ent_eq(Entrant e1, Entrant e2) {
+    return (e1.essay == e2.essay) && (e1.gender == e2.gender) && (e1.have_medal == e2.have_medal)
+        && (e1.informatics == e2.informatics) && (strcmp(e1.initials, e2.initials) == 0)
+        && (e1.math == e2.math) && (e1.russian == e2.russian) && (e1.school_num == e2.school_num)
+        && (strcmp(e1.surname, e2.surname) == 0);
 }
 
 bool check_points(Entrant e, int p) {
     return ((e.math + e.russian + e.informatics) >= p);
+}
+
+// if success returns true
+bool add_record(FILE* db, Entrant e) {
+    // printf("DEBUG 1\n");
+    fseek(db, 0, SEEK_END);
+    // printf("DEBUG 2\n");
+    if (fwrite(&e, sizeof(Entrant), 1, db) != 1) {
+        return false;
+    }
+    return true;
+}
+
+// return find or not
+bool find_record(FILE* db, Entrant e) {
+    fseek(db, sizeof(int), SEEK_SET);
+    Entrant cur;
+    bool is_found = false;
+    int fread_exit_code = fread(&cur, sizeof(Entrant), 1, db);
+    while (fread_exit_code == 1) {
+        if ((strcmp(cur.surname, e.surname) == 0) && (strcmp(cur.initials, e.initials) == 0)) {
+            is_found = true;
+            break;
+        }
+        fread_exit_code = fread(&cur, sizeof(Entrant), 1, db);
+    }
+    if (fread_exit_code == -1) {
+        perror("fread error!");
+        exit(1);
+    }
+    return is_found;
+}
+
+void interface(FILE* db) {
+    while (true) {
+        printf("---------------------\n");
+        printf("1. Find entrant\n");
+        printf("2. Add new entrant\n");
+        printf("3. Exit\n");
+        printf("Choose func: ");
+        int choice;
+        scanf("%d", &choice);
+        if (choice == 1) {
+            Entrant new;
+            printf("Enter surname: ");
+            scanf("%s", new.surname);
+            printf("Enter initials: ");
+            scanf("%s", new.initials);
+            bool res = find_record(db, new);
+            if (res) {
+                printf("Founded!\n");
+            } else {
+                printf("Not founded!\n");
+            }
+        } else if (choice == 2) {
+            Entrant new;
+            printf("Enter surname: ");
+            scanf("%s", new.surname);
+            printf("Enter initials: ");
+            scanf("%s", new.initials);
+            printf("Enter school number: ");
+            scanf("%d", &new.school_num);
+            printf("Enter math points: ");
+            scanf("%d", &new.math);
+            printf("Enter russian points: ");
+            scanf("%d", &new.russian);
+            printf("Enter informatics points: ");
+            scanf("%d", &new.informatics);
+            printf("Enter result of essay (1/0): ");
+            scanf("%d", &new.essay);
+            printf("Do entrant have a medal? (1/0): ");
+            scanf("%d", &new.have_medal);
+            printf("Enter gender: ");
+            scanf(" %c", &new.gender);
+            if (!add_record(db, new)) {
+                perror("add error!");
+                exit(1);
+            }
+        } else if (choice == 3) {
+            return;
+        }
+    }
 }
 
 int main(int argc, char** argv) {
@@ -85,7 +174,7 @@ int main(int argc, char** argv) {
         perror("Usage: ./kp06 FILENAME -p POINTS");
         exit(1);
     }
-    FILE* input = fopen(argv[1], "rb");
+    FILE* input = fopen(argv[1], "ab+");
     int p = atoi(argv[3]);
     if (input == NULL){
         perror("Can't open input file!");
@@ -113,7 +202,7 @@ int main(int argc, char** argv) {
     bool is_prev_eq = false;
 
     for (int i = 0; i < n - 1; ++i) {
-        if (ent_eq(ens[i], ens[i + 1]) && !check_points(ens[i], p) && !check_points(ens[i + 1], p)) {
+        if (ent_eq_points(ens[i], ens[i + 1]) && !check_points(ens[i], p) && !check_points(ens[i + 1], p) && ens[i].gender == 'F' && ens[i + 1].gender == 'F') {
             printf("%s %s\n", ens[i].surname, ens[i].initials);
             is_prev_eq = true;
         } else if (is_prev_eq){
@@ -124,6 +213,8 @@ int main(int argc, char** argv) {
     if (is_prev_eq) {
         printf("%s %s\n", ens[n - 1].surname, ens[n - 1].initials);
     }
+
+    interface(input);
 
     fclose(input);
 
